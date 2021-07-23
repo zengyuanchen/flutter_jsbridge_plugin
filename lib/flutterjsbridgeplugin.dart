@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 class Flutterjsbridgeplugin {
   static const MethodChannel _channel =
-  const MethodChannel('flutterjsbridgeplugin');
+      const MethodChannel('flutterjsbridgeplugin');
 
   Flutterjsbridgeplugin() {
     _channel.setMethodCallHandler(_onMethodCall);
@@ -28,5 +28,5 @@ class Flutterjsbridgeplugin {
     return await _channel.invokeMethod("handlerReturnData", url);
   }
 
-  Future<bool> _onMethodCall(MethodCall call) async {}
+  Future _onMethodCall(MethodCall call) async {}
 }

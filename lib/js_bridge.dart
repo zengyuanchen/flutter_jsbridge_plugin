@@ -11,7 +11,7 @@ typedef CallBackFunction = void Function(dynamic data);
 typedef BridgeHandler = void Function(dynamic data, CallBackFunction function);
 
 class JsBridge {
-  WebViewController _webViewController;
+  late WebViewController _webViewController;
   Map<String, CallBackFunction> _callbacks = Map();
   Map<String, BridgeHandler> _handlers = Map();
   int _uniqueId = 0;
@@ -27,9 +27,6 @@ class JsBridge {
   }
 
   void init() {
-    if (_webViewController == null) {
-      throw "WebViewController must not null";
-    }
     if (Platform.isIOS) {
       _loadJs(init_script_ios);
     } else {
@@ -52,31 +49,20 @@ class JsBridge {
         print(list);
         for (JsMsg msg in list) {
           print(msg);
-          if (msg.responseId != null) {
 
-          } else {
-            CallBackFunction function;
-            if (msg.callbackId != null) {
-              if (msg.callbackId != null) {
-                function = (dynamic data) {
-                  JsMsg callbackMsg = JsMsg();
-                  callbackMsg.responseId = msg.callbackId;
-                  callbackMsg.responseData = convert.jsonEncode(data);
-                  // 发送
-                  _loadJs(sprintf(_dartToJs, [_replaceJson(callbackMsg.toJson())]));
-                };
-              }
-            } else {
-              function = (dynamic data) {};
-            }
-            BridgeHandler handler;
-            if (msg.handlerName != null) {
-              handler = _handlers[msg.handlerName];
-            }
-            if (handler != null) {
-              handler.call(msg.data, function);
-            }
-          }
+          CallBackFunction function;
+
+          function = (dynamic data) {
+            JsMsg callbackMsg = JsMsg();
+            callbackMsg.responseId = msg.callbackId;
+            callbackMsg.responseData = convert.jsonEncode(data);
+            // 发送
+            _loadJs(sprintf(_dartToJs, [_replaceJson(callbackMsg.toJson())]));
+          };
+
+          BridgeHandler handler = _handlers[msg.handlerName]!;
+
+          handler.call(msg.data, function);
         }
       }
       return false;
@@ -89,7 +75,7 @@ class JsBridge {
   }
 
   void callHandler(String handlerName,
-      {dynamic data, CallBackFunction onCallBack}) {
+      {dynamic data, required CallBackFunction onCallBack}) {
     JsRequest request = JsRequest();
     request.handlerName = handlerName;
     if (data != null) {
@@ -100,17 +86,15 @@ class JsBridge {
       }
     }
     request.callbackId = _generateId();
-    if (onCallBack != null) {
-      _callbacks[request.callbackId] = onCallBack;
-    }
+
+    _callbacks[request.callbackId!] = onCallBack;
+
     _loadJs(sprintf(_dartToJs, [_replaceJson(request.toJson())]));
   }
 
   void registerHandler(String handlerName,
-      {dynamic data, BridgeHandler onCallBack}) {
-    if (onCallBack != null) {
-      _handlers[handlerName] = onCallBack;
-    }
+      {dynamic data, required BridgeHandler onCallBack}) {
+    _handlers[handlerName] = onCallBack;
   }
 
   String _generateId() {
