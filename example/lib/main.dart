@@ -56,22 +56,21 @@ class _MyAppState extends State<MyApp> {
             title: const Text('Plugin example app'),
           ),
           body: WebView(
-            initialUrl: "https://www.baidu.com?timeStamp=${new DateTime.now().millisecondsSinceEpoch}",
+            initialUrl:
+                "http://192.168.12.231:3000/MobileGCK/xkmaintenanceTask?token=aaf81505b30e495c84c6da8e11038edb",
             javascriptMode: JavascriptMode.unrestricted,
             onWebViewCreated: (WebViewController webViewController) async {
               _jsBridge.loadJs(webViewController);
               _controller.complete(webViewController);
-              _jsBridge.registerHandler("getToken", onCallBack: (data, func) {
+              _jsBridge.registerHandler("GET_LOCATION",
+                  onCallBack: (data, func) {
                 // return token to js
-                func({"token": "token"});
+                func("120.23,29.147888");
               });
-              _jsBridge.registerHandler("IAPpayment", onCallBack: (data, func) {
-                print("js call flutter iap");
+              _jsBridge.registerHandler("GAODE_NAV", onCallBack: (data, func) {
+                // return token to js
+                func("120.23,29.14");
               });
-              _jsBridge.registerHandler("back", onCallBack: (data, func) {
-                print("js call flutter back");
-              });
-
             },
             navigationDelegate: (NavigationRequest request) {
               if (_jsBridge.handlerUrl(request.url)) {
